@@ -51,14 +51,14 @@ export interface UserProfile {
 
 export interface Session {
   id: number;
-  startTime: string;    // ISO string — app যখন active হয়
-  endTime: string | null; // ISO string — app যখন close/minimize হয়, চলতে থাকলে null
-  avgScore: number;     // ওই session-এর posture score-এর গড়
-  duration: number;     // মিনিটে (endTime - startTime)
+  startTime: string;   
+  endTime: string | null; 
+  avgScore: number;     
+  duration: number;     
 }
 
 export interface BreakLog {
   id: number;
-  timestamp: string;    // ISO string
-  type: 'water' | 'eye' | 'sitting'; // কোন ধরনের break
+  timestamp: string;    
+  type: 'water' | 'eye' | 'sitting'; 
 }

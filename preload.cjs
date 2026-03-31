@@ -1,6 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
-// Tray থেকে monitoring toggle
 onToggleMonitoring: (callback) => {
 ipcRenderer.on('tray:toggle-monitoring', callback);
 return () => ipcRenderer.removeListener('tray:toggle-monitoring', callback);
@@ -10,11 +9,11 @@ onNavigate: (callback) => {
 ipcRenderer.on('navigate', callback);
 return () => ipcRenderer.removeListener('navigate', callback);
 },
-// Monitoring status পাঠানো
+// Monitoring status
 sendMonitoringStatus: (isPaused) => {
 ipcRenderer.send('monitoring:status', isPaused);
 },
-// Window minimize (tray এ hide)
+// Window minimize 
 minimizeWindow: () => {
 ipcRenderer.send('window:minimize');
 },

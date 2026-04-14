@@ -133,13 +133,13 @@ export const Overlay: React.FC = () => {
 
   const getReminderPosition = (pos: AlertPosition) => {
     switch (pos) {
-      case 'top': return 'top-32 left-1/2 -translate-x-1/2';
-      case 'bottom': return 'bottom-32 left-1/2 -translate-x-1/2';
-      case 'top-right': return 'top-32 right-8';
-      case 'top-left': return 'top-32 left-8';
-      case 'bottom-right': return 'bottom-32 right-8';
-      case 'bottom-left': return 'bottom-32 left-8';
-      default: return 'bottom-24 right-6';
+      case 'top': return 'top-8 left-1/2 -translate-x-1/2';
+      case 'bottom': return 'bottom-8 left-1/2 -translate-x-1/2';
+      case 'top-right': return 'top-8 right-8';
+      case 'top-left': return 'top-8 left-8';
+      case 'bottom-right': return 'bottom-8 right-8';
+      case 'bottom-left': return 'bottom-8 left-8';
+      default: return 'bottom-8 right-8';
     }
   };
 

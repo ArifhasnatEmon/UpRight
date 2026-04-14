@@ -24,7 +24,7 @@ import { useAppData } from './hooks/useAppData';
 import { useHealthTimers } from './hooks/useHealthTimers';
 import { useElectronBridge } from './hooks/useElectronBridge';
 import { useTheme } from './hooks/useTheme';
-import { loadCalibration } from './lib/posture/calibration';
+import { loadCalibration, clearCalibration } from './lib/posture/calibration';
 import { CalibrationData } from './types';
 
 import { SplashScreen } from './pages/SplashScreen';
@@ -328,9 +328,32 @@ export default function App() {
 
   const handleLogout = useCallback(() => {
     appData.handleLogout();
+    // Stop monitoring and hide all overlay elements
+    setIsMonitoring(false);
+    setShowAlert(false);
     setReminderAlert(null);
+    // Clear global state so next user gets fresh onboarding + calibration
+    localStorage.removeItem(storageKeys.onboardingComplete);
+    clearCalibration();
+    setCalibration(null);
+    // Hide bubble and clear overlay
+    setSettings(s => ({ ...s, showBubble: false }));
+    window.electronAPI?.updateOverlayState?.({
+      postureState: 'good',
+      isMonitoring: false,
+      showAlert: false,
+      alertPosition: settings.alertPosition,
+      reminderAlert: null,
+      toastMessage: null,
+      snoozeRemainingMinutes: null,
+      showBubble: false,
+      theme: resolvedTheme,
+      soundEnabled: false,
+      soundVolume: 0,
+      soundPreset: 'silent',
+    });
     setAppState('auth');
-  }, [appData.handleLogout]);
+  }, [appData.handleLogout, settings.alertPosition, resolvedTheme]);
 
   // Splash routing
 

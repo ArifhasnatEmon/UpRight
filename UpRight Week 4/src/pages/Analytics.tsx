@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, BarChart, Bar, LineChart, Line } from 'recharts';
-import { format, subDays, isAfter } from 'date-fns';
+import { format, subDays, addDays, isAfter, startOfDay, isSameDay } from 'date-fns';
 import { PostureLog, UserProfile, Session, BreakLog } from '../types';
-import { Zap } from 'lucide-react';
+import { Zap, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { cn } from '../utils';
 import { getAnalyticsInsight } from '../lib/gemini';
 
@@ -16,6 +16,7 @@ interface AnalyticsProps {
 // Analytics component
 export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [], breakLogs = [] }) => {
   const [filter, setFilter] = useState<'Daily' | 'Week' | 'Month'>('Daily');
+  const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
   const [aiInsight, setAiInsight] = useState<string>('');
   const [isLoadingInsight, setIsLoadingInsight] = useState(false);
 
@@ -30,41 +31,58 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
 
   // Filter logs
   const filteredLogs = useMemo(() => {
-    const now = new Date();
+    const ref = selectedDate;
     if (filter === 'Daily') {
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
-      return logs.filter(log => new Date(log.timestamp) >= startOfDay);
+      const dayStart = new Date(ref);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(ref);
+      dayEnd.setHours(23, 59, 59, 999);
+      return logs.filter(log => {
+        const t = new Date(log.timestamp);
+        return t >= dayStart && t <= dayEnd;
+      });
     }
-    const days = filter === 'Week' ? 7 : 30;
-    return logs.filter(log => isAfter(new Date(log.timestamp), subDays(now, days)));
-  }, [logs, filter]);
+    const days = filter === 'Week' ? 6 : 29;
+    const rangeStart = subDays(ref, days);
+    return logs.filter(log => {
+      const t = new Date(log.timestamp);
+      return t >= rangeStart && t <= ref;
+    });
+  }, [logs, filter, selectedDate]);
 
   // Filter sessions
   const filteredSessions = useMemo(() => {
-    const now = new Date();
+    const ref = selectedDate;
     if (filter === 'Daily') {
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
-      return sessions.filter(s => new Date(s.startTime) >= startOfDay);
+      const dayStart = new Date(ref);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(ref);
+      dayEnd.setHours(23, 59, 59, 999);
+      return sessions.filter(s => {
+        const t = new Date(s.startTime);
+        return t >= dayStart && t <= dayEnd;
+      });
     }
-    const days = filter === 'Week' ? 7 : 30;
-    return sessions.filter(session => isAfter(new Date(session.startTime), subDays(now, days)));
-  }, [sessions, filter]);
+    const days = filter === 'Week' ? 6 : 29;
+    const rangeStart = subDays(ref, days);
+    return sessions.filter(s => {
+      const t = new Date(s.startTime);
+      return t >= rangeStart && t <= ref;
+    });
+  }, [sessions, filter, selectedDate]);
 
   // Aggregate logs
   const aggregatedData = useMemo(() => {
-    const now = new Date();
+    const refDate = selectedDate;
 
     if (filter === 'Daily') {
       return Array.from({ length: 24 }, (_, hour) => {
         const hourLogs = logs.filter(l => {
           const t = new Date(l.timestamp);
-          const today = new Date(now);
           return (
-            t.getFullYear() === today.getFullYear() &&
-            t.getMonth() === today.getMonth() &&
-            t.getDate() === today.getDate() &&
+            t.getFullYear() === refDate.getFullYear() &&
+            t.getMonth() === refDate.getMonth() &&
+            t.getDate() === refDate.getDate() &&
             t.getHours() === hour
           );
         });
@@ -84,7 +102,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
 
     if (filter === 'Week') {
       return Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(now);
+        const d = new Date(refDate);
         d.setDate(d.getDate() - (6 - i));
         const dayStr = d.toISOString().split('T')[0];
         const dayLogs = logs.filter(l => l.timestamp.startsWith(dayStr));
@@ -100,7 +118,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
 
     if (filter === 'Month') {
       return Array.from({ length: 6 }, (_, i) => {
-        const endDay = new Date(now);
+        const endDay = new Date(refDate);
         endDay.setDate(endDay.getDate() - i * 5);
         const startDay = new Date(endDay);
         startDay.setDate(startDay.getDate() - 4);
@@ -119,7 +137,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
     }
 
     return [];
-  }, [logs, filter]);
+  }, [logs, filter, selectedDate]);
 
   // State distribution
   const STATE_LABELS: Record<string, string> = { good: 'Good', warning: 'Warning', critical: 'Critical', too_close: 'Too Close' };
@@ -208,29 +226,93 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
 
   return (
     <div className="space-y-8 pb-12" role="region" aria-label="Health analytics">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
+      <div className="space-y-4">
+        <div>
           <h2 className="text-3xl font-display font-bold text-fg">Health Analytics</h2>
           <p className="text-fg-muted">Deep dive into your ergonomic performance</p>
         </div>
-        <div className="flex gap-1 p-1 bg-card border border-edge rounded-2xl">
-          {(['Daily', 'Week', 'Month'] as const).map(p => (
-            <button
-              key={p}
-              onClick={() => setFilter(p)}
-              className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-colors", filter === p ? "bg-tint-brand text-brand-700 dark:text-brand-400" : "hover:bg-inset text-fg-muted")}
-              aria-pressed={filter === p}
-            >
-              {p}
-            </button>
-          ))}
+
+        <div className="flex items-center justify-between">
+          {/* Date navigator */}
+          {(() => {
+            const today = startOfDay(new Date());
+            const isToday = isSameDay(selectedDate, today);
+            const step = filter === 'Daily' ? 1 : filter === 'Week' ? 7 : 30;
+            const canGoForward = !isToday;
+
+            const dateLabel = filter === 'Daily'
+              ? (isToday ? "Today" : format(selectedDate, 'EEE, MMM d'))
+              : filter === 'Week'
+                ? `${format(subDays(selectedDate, 6), 'MMM d')} – ${format(selectedDate, 'MMM d')}`
+                : `${format(subDays(selectedDate, 29), 'MMM d')} – ${format(selectedDate, 'MMM d')}`;
+
+            return (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setSelectedDate(prev => startOfDay(subDays(prev, step)))}
+                  className="p-1.5 rounded-lg hover:bg-inset border border-edge-subtle text-fg-muted hover:text-fg transition-colors"
+                  aria-label={`Go to previous ${filter === 'Daily' ? 'day' : filter === 'Week' ? 'week' : 'month'}`}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-2 px-4 py-2 bg-card border border-edge rounded-xl min-w-[160px] justify-center">
+                  <Calendar className="w-3.5 h-3.5 text-fg-faint" />
+                  <span className="text-sm font-bold text-fg">{dateLabel}</span>
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (canGoForward) {
+                      const next = startOfDay(addDays(selectedDate, step));
+                      setSelectedDate(next > today ? today : next);
+                    }
+                  }}
+                  disabled={!canGoForward}
+                  className={cn(
+                    "p-1.5 rounded-lg border border-edge-subtle transition-colors",
+                    canGoForward
+                      ? "hover:bg-inset text-fg-muted hover:text-fg"
+                      : "text-fg-faint/30 cursor-not-allowed"
+                  )}
+                  aria-label={`Go to next ${filter === 'Daily' ? 'day' : filter === 'Week' ? 'week' : 'month'}`}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+
+                {!isToday && (
+                  <button
+                    onClick={() => setSelectedDate(today)}
+                    className="px-3 py-1.5 rounded-lg bg-tint-brand text-brand-700 dark:text-brand-400 text-[10px] font-bold uppercase tracking-wider hover:bg-tint-brand-strong transition-colors ml-1"
+                  >
+                    Today
+                  </button>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Period filter */}
+          <div className="flex gap-1 p-1 bg-card border border-edge rounded-2xl">
+            {(['Daily', 'Week', 'Month'] as const).map(p => (
+              <button
+                key={p}
+                onClick={() => { setFilter(p); setSelectedDate(startOfDay(new Date())); }}
+                className={cn("px-4 py-2 rounded-xl text-sm font-bold transition-colors", filter === p ? "bg-tint-brand text-brand-700 dark:text-brand-400" : "hover:bg-inset text-fg-muted")}
+                aria-pressed={filter === p}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 glass rounded-[2.5rem] p-8 space-y-6" role="region" aria-label="Posture score trend chart">
           <h3 className="font-display font-bold text-lg text-fg">
-            {filter === 'Daily' ? "Today's Trend"
+            {filter === 'Daily'
+              ? (isSameDay(selectedDate, startOfDay(new Date())) ? "Today's Trend" : `${format(selectedDate, 'MMM d')} Trend`)
               : filter === 'Week' ? '7-Day Trend'
                 : '30-Day Trend'}
           </h3>
@@ -497,7 +579,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
 
             return (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={daysData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={daysData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartGrid} />
                   <XAxis
                     dataKey="date"

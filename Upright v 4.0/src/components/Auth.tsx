@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Shield, Lock, Mail, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { storageKeys } from '../lib/storage';
+import { EMOJI_CHECK } from '../lib/emoji';
 import type { Account } from '../types';
 
 interface AuthProps {
@@ -69,7 +70,7 @@ export const Auth: React.FC<AuthProps> = ({ onAuth }) => {
     setIsLogin(true);
     setPassword('');
     setConfirmPassword('');
-    setError('✅ Password reset successfully! Please sign in.');
+    setError(`${EMOJI_CHECK} Password reset successfully! Please sign in.`);
   };
 
   const getTitle = () => {

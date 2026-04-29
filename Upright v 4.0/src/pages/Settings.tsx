@@ -1,11 +1,27 @@
 import React from 'react';
-import { Smartphone, Cpu, Activity, Timer, Eye, Droplets, Moon, Sun, Monitor, Target, RotateCcw, Volume2, VolumeX, Circle } from 'lucide-react';
+import { Smartphone, Cpu, Activity, Timer, Eye, Droplets, Moon, Sun, Monitor, Target, RotateCcw, Volume2, VolumeX, Circle, Bell, Music, Headphones, Upload, Trash2 } from 'lucide-react';
 import { AppSettings, HardwareProfile, CalibrationData } from '../types';
 import { cn } from '../utils';
 import { clearCalibration } from '../lib/posture/calibration';
 import { CalibrationWizard } from '../components/CalibrationWizard';
+import { AudioTrimmer } from '../components/AudioTrimmer';
 import { getHardwareProfile } from '../lib/hardwareProfile';
-import { playSound } from '../lib/audio';
+import { playSound, playCustomSound } from '../lib/audio';
+import { EMOJI_WARNING } from '../lib/emoji';
+
+const MAX_CLIP_DURATION = 15; // seconds
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+// Get audio duration from a data URL
+const getAudioDuration = (dataUrl: string): Promise<number> => {
+  return new Promise((resolve) => {
+    const audio = new Audio(dataUrl);
+    audio.addEventListener('loadedmetadata', () => {
+      resolve(audio.duration);
+    });
+    audio.addEventListener('error', () => resolve(0));
+  });
+};
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => ({
   value: i,
@@ -24,6 +40,8 @@ interface SettingsProps {
 export const Settings: React.FC<SettingsProps> = ({ settings, setSettings, onSave, calibration, onCalibrationUpdate }) => {
   const [hardware, setHardware] = React.useState<HardwareProfile | null>(null);
   const [isCalibrating, setIsCalibrating] = React.useState(false);
+  const [pendingAudio, setPendingAudio] = React.useState<string | null>(null);
+  const [pendingAudioName, setPendingAudioName] = React.useState<string>('');
 
   // Calibration staleness
   const isCalibrationStale = React.useMemo(() => {
@@ -159,7 +177,7 @@ export const Settings: React.FC<SettingsProps> = ({ settings, setSettings, onSav
           
           {isCalibrationStale && (
             <div className="mb-4 bg-tint-amber/50 border border-amber-500/20 px-3 py-2 rounded-lg flex items-start gap-2">
-              <span className="text-amber-500 text-[10px] mt-0.5">⚠️</span>
+              <span className="text-amber-500 text-[10px] mt-0.5">{EMOJI_WARNING}</span>
               <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
                 Calibration is 30+ days old — consider recalibrating for better accuracy.
               </p>
@@ -244,44 +262,138 @@ export const Settings: React.FC<SettingsProps> = ({ settings, setSettings, onSav
               </div>
 
               {/* Sound preset */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <p className="text-xs font-bold text-fg-secondary">Sound Preset</p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-1.5">
                   {([
-                    { id: 'default' as const, label: 'Default', emoji: '🔔' },
-                    { id: 'gentle' as const, label: 'Gentle', emoji: '🌙' },
-                    { id: 'chime' as const, label: 'Chime', emoji: '🎵' },
-                    { id: 'silent' as const, label: 'Silent', emoji: '🔇' },
+                    { id: 'default' as const, label: 'Default', Icon: Bell },
+                    { id: 'gentle' as const, label: 'Gentle', Icon: Moon },
+                    { id: 'chime' as const, label: 'Chime', Icon: Music },
+                    { id: 'silent' as const, label: 'Silent', Icon: VolumeX },
+                    { id: 'custom' as const, label: settings.customSoundName ? settings.customSoundName.replace(/\.[^.]+$/, '').slice(0, 8) : 'Custom', Icon: Headphones },
                   ]).map(preset => (
                     <button
                       key={preset.id}
                       onClick={() => {
                         setSettings(s => ({ ...s, soundPreset: preset.id }));
-                        if (preset.id !== 'silent') {
+                        if (preset.id === 'custom' && settings.customSoundUrl) {
+                          playCustomSound(settings.customSoundUrl, settings.soundVolume);
+                        } else if (preset.id !== 'silent' && preset.id !== 'custom') {
                           playSound('alert', { soundEnabled: true, soundVolume: settings.soundVolume, soundPreset: preset.id });
                         }
                       }}
                       className={cn(
-                        "flex flex-col items-center gap-1 px-2 py-3 rounded-xl text-xs font-bold transition-all",
+                        "flex flex-col items-center gap-1.5 py-3 rounded-xl text-[10px] font-bold transition-all",
                         settings.soundPreset === preset.id
                           ? "bg-brand-500 text-white shadow-md shadow-brand-500/20"
                           : "bg-inset text-fg-secondary hover:bg-edge-subtle hover:text-fg border border-edge-subtle"
                       )}
                       aria-pressed={settings.soundPreset === preset.id}
                     >
-                      <span className="text-base">{preset.emoji}</span>
-                      {preset.label}
+                      <preset.Icon className="w-4 h-4" />
+                      <span className="truncate max-w-full px-1">{preset.label}</span>
                     </button>
                   ))}
                 </div>
+
+                {/* Custom sound panel — only when custom preset is active */}
+                {settings.soundPreset === 'custom' && (
+                  <div className="p-3 rounded-xl bg-inset border border-edge-subtle space-y-2.5">
+                    {settings.customSoundUrl ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-tint-brand flex items-center justify-center shrink-0">
+                            <Music className="w-4 h-4 text-brand-600 dark:text-brand-400" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-fg truncate">{settings.customSoundName}</p>
+                            <p className="text-[9px] text-fg-faint">Custom alert sound{settings.customSoundDuration ? ` · ${settings.customSoundDuration.toFixed(1)}s` : ''}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setSettings(s => ({ ...s, customSoundUrl: undefined, customSoundName: undefined, customSoundDuration: undefined, soundPreset: 'default' }))}
+                          className="p-1.5 rounded-lg hover:bg-tint-red text-fg-faint hover:text-red-500 transition-all shrink-0"
+                          title="Remove sound"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className="w-8 h-8 rounded-lg bg-inset border border-dashed border-edge flex items-center justify-center group-hover:border-brand-400 group-hover:bg-tint-brand transition-all shrink-0">
+                          <Upload className="w-4 h-4 text-fg-faint group-hover:text-brand-500 transition-colors" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-fg-secondary group-hover:text-fg transition-colors">Upload audio file</p>
+                          <p className="text-[9px] text-fg-faint">.mp3, .wav, .ogg — max 5MB</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept=".mp3,.wav,.ogg,audio/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file || file.size > MAX_FILE_SIZE) return;
+                            const reader = new FileReader();
+                            reader.onload = async () => {
+                              const dataUrl = reader.result as string;
+                              const duration = await getAudioDuration(dataUrl);
+                              if (duration <= MAX_CLIP_DURATION) {
+                                // Short file — use directly
+                                setSettings(s => ({ ...s, customSoundUrl: dataUrl, customSoundName: file.name, customSoundDuration: duration }));
+                              } else {
+                                // Long file — open trimmer
+                                setPendingAudio(dataUrl);
+                                setPendingAudioName(file.name);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
+
+                {/* Audio Trimmer — shown when a long file is pending */}
+                {pendingAudio && (
+                  <AudioTrimmer
+                    audioDataUrl={pendingAudio}
+                    fileName={pendingAudioName}
+                    maxDuration={MAX_CLIP_DURATION}
+                    onClipReady={(clipUrl, duration) => {
+                      setSettings(s => ({
+                        ...s,
+                        customSoundUrl: clipUrl,
+                        customSoundName: pendingAudioName,
+                        customSoundDuration: duration,
+                        soundPreset: 'custom',
+                      }));
+                      setPendingAudio(null);
+                      setPendingAudioName('');
+                    }}
+                    onCancel={() => {
+                      setPendingAudio(null);
+                      setPendingAudioName('');
+                    }}
+                  />
+                )}
               </div>
 
               {/* Test sound */}
               <button
-                onClick={() => playSound('alert', settings)}
-                className="w-full py-2 text-xs font-bold bg-inset border border-edge rounded-xl hover:bg-edge text-fg-secondary transition-colors"
+                onClick={() => {
+                  if (settings.soundPreset === 'custom' && settings.customSoundUrl) {
+                    playCustomSound(settings.customSoundUrl, settings.soundVolume);
+                  } else {
+                    playSound('alert', settings);
+                  }
+                }}
+                disabled={settings.soundPreset === 'silent'}
+                className="w-full py-2.5 text-xs font-bold bg-inset border border-edge rounded-xl hover:bg-edge text-fg-secondary transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                🔊 Test Alert Sound
+                <Volume2 className="w-3.5 h-3.5" />
+                Test Alert Sound
               </button>
             </>
           )}

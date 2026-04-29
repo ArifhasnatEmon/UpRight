@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { PostureState } from './types';
+import { EMOJI_GLOW_STAR, EMOJI_TROPHY, EMOJI_ARROW_UP, CHAR_SPARKLE } from './lib/emoji';
 import { cn } from './utils';
 import { TIMING } from './lib/constants';
 import { getDailyTip, getOfflineTip } from './lib/gemini';
@@ -50,6 +51,23 @@ export default function App() {
   const [showAlert, setShowAlert] = useState(false);
   const [reminderAlert, setReminderAlert] = useState<{ type: 'water' | 'eye' | 'sitting'; message: string } | null>(null);
   const reminderSnoozedUntil = useRef<number>(0);
+
+  // Reminder completion tracking
+  const [reminderCompletions, setReminderCompletions] = useState<{ water: number; eye: number; sitting: number }>({
+    water: 0,
+    eye: 0,
+    sitting: 0,
+  });
+
+  // Midnight reset for reminder completions
+  useEffect(() => {
+    const now = new Date();
+    const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
+    const timer = setTimeout(() => {
+      setReminderCompletions({ water: 0, eye: 0, sitting: 0 });
+    }, msUntilMidnight);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Snooze refs
   const snoozeEndTimeRef = useRef<number>(0);
@@ -114,9 +132,20 @@ export default function App() {
   // Alert refs
   const lastAlertTime = useRef<number>(0);
   const criticalStartTime = useRef<number | null>(null);
-  const goodPostureXpInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastReminderTime = useRef<number>(0);
   const lastOverlayState = useRef<string>('');
+
+  // Daily login bonus + session creation
+  const createSessionWithLoginBonus = useCallback((email: string) => {
+    appData.createSession(email);
+    const todayKey = new Date().toISOString().split('T')[0];
+    const lastLoginDay = localStorage.getItem('upright_last_login_day');
+    if (lastLoginDay !== todayKey) {
+      localStorage.setItem('upright_last_login_day', todayKey);
+      appData.addXP(20);
+      setToastMessage(`${EMOJI_GLOW_STAR} Daily login bonus: +20 XP!`);
+    }
+  }, [appData.createSession, appData.addXP, setToastMessage]);
 
   // Derived callbacks
 
@@ -174,17 +203,6 @@ export default function App() {
 
   useEffect(() => { reminderAlertRef.current = reminderAlert; }, [reminderAlert]);
 
-  // XP rewards
-  useEffect(() => {
-    if (goodPostureXpInterval.current) clearInterval(goodPostureXpInterval.current);
-    goodPostureXpInterval.current = setInterval(() => {
-      if (postureState === 'good' && isMonitoring) {
-        appData.addXP(3);
-        appData.pushSessionScore(postureScore);
-      }
-    }, TIMING.GOOD_POSTURE_XP_INTERVAL);
-    return () => { if (goodPostureXpInterval.current) clearInterval(goodPostureXpInterval.current); };
-  }, [postureState, isMonitoring, postureScore, appData.addXP, appData.pushSessionScore]);
 
   // Posture handler
 
@@ -248,8 +266,9 @@ export default function App() {
       showAlert,
       alertPosition: settings.alertPosition,
       reminderAlert,
+      reminderCompletions,
       // Only forward achievement/level-up toasts to overlay, not mundane messages
-      toastMessage: toastMessage && (toastMessage.startsWith('🏆') || toastMessage.includes('Level Up') || toastMessage.startsWith('⬆️'))
+      toastMessage: toastMessage && (toastMessage.startsWith(EMOJI_TROPHY) || toastMessage.includes('Level Up') || toastMessage.startsWith(EMOJI_ARROW_UP))
         ? toastMessage
         : null,
       snoozeRemainingMinutes: snoozeMinutesLeft,
@@ -258,6 +277,7 @@ export default function App() {
       soundEnabled: settings.soundEnabled,
       soundVolume: settings.soundVolume,
       soundPreset: settings.soundPreset,
+      customSoundUrl: settings.customSoundUrl,
     };
 
     const stateKey = JSON.stringify(newState);
@@ -266,7 +286,7 @@ export default function App() {
 
 
     window.electronAPI?.updateOverlayState?.(newState);
-  }, [postureState, isMonitoring, showAlert, settings.alertPosition, settings.showBubble, settings.soundEnabled, settings.soundVolume, settings.soundPreset, reminderAlert, toastMessage, snoozeMinutesLeft, resolvedTheme]);
+  }, [postureState, isMonitoring, showAlert, settings.alertPosition, settings.showBubble, settings.soundEnabled, settings.soundVolume, settings.soundPreset, settings.customSoundUrl, reminderAlert, reminderCompletions, toastMessage, snoozeMinutesLeft, resolvedTheme]);
 
   useEffect(() => {
     if (window.electronAPI?.onOverlayActionReceived) {
@@ -285,6 +305,11 @@ export default function App() {
           playSound('dismiss', settings);
           if (reminderAlert) {
             appData.addBreakLog(reminderAlert.type);
+            appData.addXP(5); // Bonus XP for completing a health break
+            setReminderCompletions(prev => ({
+              ...prev,
+              [reminderAlert.type]: prev[reminderAlert.type] + 1,
+            }));
             if (reminderAlert.type === 'water') originalResetWater();
             else if (reminderAlert.type === 'eye') resetEyeTimer();
             else if (reminderAlert.type === 'sitting') resetSittingTimer();
@@ -314,7 +339,7 @@ export default function App() {
     if (userData.email) {
       const hasCompletedOnboarding = localStorage.getItem(storageKeys.onboardingComplete);
       if (hasCompletedOnboarding) {
-        appData.createSession(userData.email);
+        createSessionWithLoginBonus(userData.email);
         setAppState('main');
       } else {
         setAppState('onboarding');
@@ -324,7 +349,7 @@ export default function App() {
       const hasCompletedOnboarding = localStorage.getItem(storageKeys.onboardingComplete);
       setAppState(hasCompletedOnboarding ? 'main' : 'onboarding');
     }
-  }, [appData.handleAuth, appData.createSession]);
+  }, [appData.handleAuth, createSessionWithLoginBonus]);
 
   const handleLogout = useCallback(() => {
     appData.handleLogout();
@@ -367,7 +392,7 @@ export default function App() {
             if (hasCompletedOnboarding) {
 
               const { email } = JSON.parse(currentUser);
-              if (email) appData.createSession(email);
+              if (email) createSessionWithLoginBonus(email);
               setAppState('main');
             } else {
               setAppState('onboarding');
@@ -387,7 +412,7 @@ export default function App() {
       <Onboarding onComplete={() => {
         localStorage.setItem(storageKeys.onboardingComplete, 'true');
 
-        if (appData.currentUserEmail) appData.createSession(appData.currentUserEmail);
+        if (appData.currentUserEmail) createSessionWithLoginBonus(appData.currentUserEmail);
         setAppState('main');
       }} />
     );
@@ -525,7 +550,7 @@ export default function App() {
               </div>
               <p className="text-xs text-white/80 leading-relaxed font-medium">{dailyTip}</p>
               {appData.currentUserEmail && (
-                <p className="text-[8px] text-brand-400/50 mt-2">✦ AI-powered</p>
+                <p className="text-[8px] text-brand-400/50 mt-2">{CHAR_SPARKLE} AI-powered</p>
               )}
             </div>
             <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
@@ -564,6 +589,7 @@ export default function App() {
               onStateChange={handleStateChange}
               calibration={calibration}
               onCalibrationUpdate={setCalibration}
+              reminderCompletions={reminderCompletions}
             />
           </div>
           {activeTab === 'analytics' && (
@@ -602,7 +628,10 @@ export default function App() {
 
       {/* Toast Notification */}
       <AnimatePresence>
-        {toastMessage && (
+        {toastMessage &&
+         !toastMessage.startsWith(EMOJI_TROPHY) &&
+         !toastMessage.includes('Level Up') &&
+         !toastMessage.startsWith(EMOJI_ARROW_UP) && (
           <motion.div
             initial={{ opacity: 0, y: -50, x: '-50%' }}
             animate={{ opacity: 1, y: 20, x: '-50%' }}
@@ -611,7 +640,7 @@ export default function App() {
             role="status"
             aria-live="polite"
           >
-            {toastMessage.startsWith('🏆') ? (
+            {toastMessage.startsWith(EMOJI_TROPHY) ? (
               <Trophy className="w-5 h-5 text-brand-400" />
             ) : (
               <Activity className="w-5 h-5 text-brand-400" />

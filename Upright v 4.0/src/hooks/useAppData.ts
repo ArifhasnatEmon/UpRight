@@ -3,6 +3,7 @@ import { UserProfile, PostureLog, PostureState, Session, BreakLog } from '../typ
 import { storageKeys, getJSON, setJSON } from '../lib/storage';
 import { getLevelFromXp, TIMING, ACHIEVEMENT_DEFINITIONS } from '../lib/constants';
 import { getAchievementMessage } from '../lib/gemini';
+import { EMOJI_ARROW_UP, EMOJI_TROPHY } from '../lib/emoji';
 
 const DEFAULT_USER: UserProfile = {
   name: 'Guest User',
@@ -53,7 +54,11 @@ export const useAppData = ({ setToastMessage }: UseAppDataOptions) => {
 
     const savedUser = localStorage.getItem(storageKeys.user(email));
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsed = JSON.parse(savedUser);
+      const recalculatedLevel = getLevelFromXp(parsed.xp);
+      // Never decrease level — grandfather existing progress
+      parsed.level = Math.max(parsed.level, recalculatedLevel);
+      setUser(parsed);
     } else {
       setUser({ ...DEFAULT_USER, name });
     }
@@ -191,7 +196,7 @@ export const useAppData = ({ setToastMessage }: UseAppDataOptions) => {
       const updatedUser = { ...prev, xp: newXp, level: newLevel };
 
       if (levelUp) {
-        setToastMessage(`⬆️ Level Up! You are now Level ${newLevel}!`);
+        setToastMessage(`${EMOJI_ARROW_UP} Level Up! You are now Level ${newLevel}!`);
       }
 
       const email = emailRef.current;
@@ -247,13 +252,52 @@ export const useAppData = ({ setToastMessage }: UseAppDataOptions) => {
             }
             return false;
           }
+          // Long-term achievements
+          case 'marathon': {
+            const totalDuration = currentLogs.reduce((sum, l) => sum + l.duration, 0);
+            return totalDuration >= 8 * 60;
+          }
+          case 'streak_7': {
+            const uniqueDays = new Set(currentLogs.map(l => l.timestamp.split('T')[0]));
+            return uniqueDays.size >= 7;
+          }
+          case 'streak_30': {
+            const uniqueDays = new Set(currentLogs.map(l => l.timestamp.split('T')[0]));
+            return uniqueDays.size >= 30;
+          }
+          case 'thousand': return currentLogs.length >= 1000;
+          case 'hydration_pro': {
+            if (email) {
+              return getJSON<BreakLog[]>(storageKeys.breakLogs(email), [])
+                .filter(b => b.type === 'water').length >= 50;
+            }
+            return false;
+          }
+          case 'perfect_hour': {
+            if (currentLogs.length < 120) return false;
+            return currentLogs.slice(0, 120).every(l => l.score >= 90);
+          }
+          case 'night_shift': return new Date().getHours() >= 0 && new Date().getHours() < 4;
+          case 'comeback': {
+            if (currentLogs.length < 3) return false;
+            const recent = currentLogs.slice(0, 5);
+            const hasCritical = recent.some(l => l.state === 'critical');
+            const hasGood = recent[0].state === 'good' && recent[0].score >= 80;
+            return hasCritical && hasGood;
+          }
           default: return false;
         }
       });
 
       if (toUnlock.length > 0) {
         const newAchievements = toUnlock.map((def: any) => ({ ...def, unlockedAt: new Date().toISOString() }));
-        const updatedUser = { ...prev, achievements: [...prev.achievements, ...newAchievements] };
+        const updatedUser = {
+          ...prev,
+          achievements: [...prev.achievements, ...newAchievements],
+          xp: prev.xp + (toUnlock.length * 25), // +25 XP per achievement
+        };
+        // Recalculate level with bonus XP
+        updatedUser.level = getLevelFromXp(updatedUser.xp);
 
         if (email) {
           setJSON(storageKeys.user(email), updatedUser);
@@ -264,7 +308,7 @@ export const useAppData = ({ setToastMessage }: UseAppDataOptions) => {
             getAchievementMessage(newAchievements[0].title, newAchievements[0].description)
               .then((msg: string) => setToastMessage(msg));
           } else {
-            setToastMessage(`🏆 Achievement Unlocked: ${newAchievements[0].title}!`);
+            setToastMessage(`${EMOJI_TROPHY} Achievement Unlocked: ${newAchievements[0].title}!`);
           }
         }, 3200);
 
@@ -297,9 +341,9 @@ export const useAppData = ({ setToastMessage }: UseAppDataOptions) => {
       sessionScores.current.push(score);
 
       let earnedXp = 0;
-      if (state === 'good' && score >= 80) earnedXp = 3;
-      else if (score >= 80) earnedXp = 5;
-      else if (score >= 50) earnedXp = 1;
+      if (score >= 80) earnedXp = 2;      // Good posture
+      else if (score >= 60) earnedXp = 1;  // Decent posture
+      // Below 60: no XP
       if (earnedXp > 0) addXP(earnedXp);
 
       checkAchievements(updatedLogs, waterResetsRef.current);

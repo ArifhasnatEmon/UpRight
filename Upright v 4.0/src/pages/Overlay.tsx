@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { FloatingAlert } from '../components/FloatingAlert';
 import { SystemTray } from '../components/SystemTray';
 import { PostureState, AlertPosition } from '../types';
+import { EMOJI_DROPLET, EMOJI_EYE, EMOJI_MEDITATION, EMOJI_TROPHY, EMOJI_ARROW_UP, EMOJI_SPARKLES } from '../lib/emoji';
+import { CHAR_CHECK } from '../lib/emoji';
 
 export interface OverlayState {
   postureState: PostureState;
@@ -10,13 +12,15 @@ export interface OverlayState {
   showAlert: boolean;
   alertPosition: AlertPosition;
   reminderAlert: { type: 'water' | 'eye' | 'sitting'; message: string } | null;
+  reminderCompletions?: { water: number; eye: number; sitting: number };
   toastMessage: string | null;
   snoozeRemainingMinutes: number | null;
   showBubble: boolean;
   theme?: 'light' | 'dark';
   soundEnabled?: boolean;
   soundVolume?: number;
-  soundPreset?: 'default' | 'gentle' | 'chime' | 'silent';
+  soundPreset?: 'default' | 'gentle' | 'chime' | 'silent' | 'custom';
+  customSoundUrl?: string;
 }
 
 const REMINDER_AUTO_DISMISS_MS = 15000;
@@ -24,7 +28,7 @@ const TOAST_DISPLAY_MS = 5000;
 
 const REMINDER_CONFIG = {
   water: {
-    emoji: '💧',
+    emoji: EMOJI_DROPLET,
     title: 'Hydration Reminder',
     border: 'border-blue-200 dark:border-blue-500/30',
     indicator: 'bg-blue-500',
@@ -32,7 +36,7 @@ const REMINDER_CONFIG = {
     btnSecondary: 'bg-tint-blue hover:bg-tint-blue-strong text-blue-900 dark:text-blue-300',
   },
   eye: {
-    emoji: '👁️',
+    emoji: EMOJI_EYE,
     title: 'Eye Strain Break',
     border: 'border-indigo-200 dark:border-indigo-500/30',
     indicator: 'bg-indigo-500',
@@ -40,7 +44,7 @@ const REMINDER_CONFIG = {
     btnSecondary: 'bg-tint-indigo hover:bg-tint-indigo-strong text-indigo-900 dark:text-indigo-300',
   },
   sitting: {
-    emoji: '🧘',
+    emoji: EMOJI_MEDITATION,
     title: 'Sitting Break',
     border: 'border-amber-200 dark:border-amber-500/30',
     indicator: 'bg-amber-500',
@@ -128,8 +132,8 @@ export const Overlay: React.FC = () => {
   if (!state) return null;
 
   const reminderConfig = state.reminderAlert ? REMINDER_CONFIG[state.reminderAlert.type] : null;
-  const isAchievement = toastText?.startsWith('🏆') || toastText?.includes('Achievement');
-  const isLevelUp = toastText?.includes('Level Up') || toastText?.startsWith('⬆️');
+  const isAchievement = toastText?.startsWith(EMOJI_TROPHY) || toastText?.includes('Achievement');
+  const isLevelUp = toastText?.includes('Level Up') || toastText?.startsWith(EMOJI_ARROW_UP);
 
   const getReminderPosition = (pos: AlertPosition) => {
     switch (pos) {
@@ -171,6 +175,7 @@ export const Overlay: React.FC = () => {
           soundEnabled: state.soundEnabled ?? true,
           soundVolume: state.soundVolume ?? 0.5,
           soundPreset: state.soundPreset ?? 'default',
+          customSoundUrl: state.customSoundUrl,
         }}
       />
 
@@ -203,9 +208,14 @@ export const Overlay: React.FC = () => {
                         Snooze 15m
                       </button>
                       <button onClick={() => window.electronAPI?.sendOverlayAction?.('reminder-done')} className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all shadow-sm ${reminderConfig.btnPrimary}`}>
-                        Done ✓
+                        Done {CHAR_CHECK}
                       </button>
                     </div>
+                    {state.reminderCompletions && (
+                      <p className="text-[10px] text-fg-faint mt-2 font-medium">
+                        {reminderConfig.emoji} {state.reminderCompletions[state.reminderAlert.type]} completed today — keep it up!
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -236,11 +246,11 @@ export const Overlay: React.FC = () => {
               </div>
               <div className="relative z-10 flex items-center gap-3">
                 <div className="flex items-center justify-center text-xl shrink-0">
-                  {isAchievement ? '🏆' : isLevelUp ? '⬆️' : '✨'}
+                  {isAchievement ? EMOJI_TROPHY : isLevelUp ? EMOJI_ARROW_UP : EMOJI_SPARKLES}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-fg tracking-tight">
-                    {toastText.replace(/^🏆\s*/, '').replace(/^⬆️\s*/, '')}
+                    {toastText.replace(new RegExp(`^${EMOJI_TROPHY}\\s*`), '').replace(new RegExp(`^${EMOJI_ARROW_UP}\\s*`), '')}
                   </p>
                 </div>
               </div>

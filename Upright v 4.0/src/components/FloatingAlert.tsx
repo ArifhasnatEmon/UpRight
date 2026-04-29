@@ -14,7 +14,7 @@ interface FloatingAlertProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   className?: string;
-  soundSettings?: Pick<AppSettings, 'soundEnabled' | 'soundVolume' | 'soundPreset'>;
+  soundSettings?: Pick<AppSettings, 'soundEnabled' | 'soundVolume' | 'soundPreset' | 'customSoundUrl'>;
 }
 
 const AUTO_DISMISS_MS = 8000;

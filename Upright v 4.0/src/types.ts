@@ -35,14 +35,17 @@ export interface AppSettings {
   postureSensitivity: number; // 1-10
   frameRate: number;
   lowResourceMode: boolean;
-  anonymousDataSharing: boolean;
-  localStorageOnly: boolean;
+  cloudSyncEnabled: boolean;
+  contributeToResearch: boolean;
   reminders: ReminderSettings;
   quietHours: QuietHours;
   theme: 'light' | 'dark' | 'system';
   soundEnabled: boolean;
   soundVolume: number;           // Volume scale
-  soundPreset: 'default' | 'gentle' | 'chime' | 'silent';
+  soundPreset: 'default' | 'gentle' | 'chime' | 'silent' | 'custom';
+  customSoundUrl?: string;
+  customSoundName?: string;
+  customSoundDuration?: number;  // Duration of stored clip in seconds
 }
 
 // Account types

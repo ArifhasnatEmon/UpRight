@@ -10,8 +10,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   postureSensitivity: 5,
   frameRate: 30,
   lowResourceMode: false,
-  anonymousDataSharing: false,
-  localStorageOnly: false,
+  cloudSyncEnabled: true,
+  contributeToResearch: false,
   reminders: {
     posture: true,
     sitting: true,
@@ -30,6 +30,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   soundEnabled: true,
   soundVolume: 0.5,
   soundPreset: 'default',
+  customSoundUrl: undefined,
+  customSoundName: undefined,
+  customSoundDuration: undefined,
 };
 
 // Settings hook

@@ -3,6 +3,7 @@ import { User as UserIcon, Zap, Lock, Trophy, LogOut, Edit2, Check, X, Star, Tar
 import { ACHIEVEMENT_DEFINITIONS } from '../lib/constants';
 import { UserProfile, PostureLog, AppSettings } from '../types';
 import { cn } from '../utils';
+import { EMOJI_CLOUD, EMOJI_CHART, EMOJI_PHONE, EMOJI_LOCK, CHAR_CHECK } from '../lib/emoji';
 
 interface ProfileProps {
   user: UserProfile;
@@ -145,12 +146,12 @@ export const Profile: React.FC<ProfileProps> = ({ user, logs, settings, setSetti
     setIsEditingName(false);
   };
 
-  const toggleAnonymousSharing = () => {
-    setSettings(prev => ({ ...prev, anonymousDataSharing: !prev.anonymousDataSharing }));
+  const toggleCloudSync = () => {
+    setSettings(prev => ({ ...prev, cloudSyncEnabled: !prev.cloudSyncEnabled }));
   };
 
-  const toggleLocalStorageOnly = () => {
-    setSettings(prev => ({ ...prev, localStorageOnly: !prev.localStorageOnly }));
+  const toggleContributeToResearch = () => {
+    setSettings(prev => ({ ...prev, contributeToResearch: !prev.contributeToResearch }));
   };
 
   const ALL_ACHIEVEMENTS = ACHIEVEMENT_DEFINITIONS;
@@ -266,38 +267,41 @@ export const Profile: React.FC<ProfileProps> = ({ user, logs, settings, setSetti
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-xs text-fg">Anonymous Sharing</p>
-                <p className="text-[10px] text-fg-faint">Help improve AI models</p>
+                <p className="font-bold text-xs text-fg">Cloud Sync {EMOJI_CLOUD}</p>
+                <p className="text-[10px] text-fg-faint">Sync data across devices</p>
               </div>
-              <button 
-                onClick={toggleAnonymousSharing}
-                className={cn("w-8 h-4 rounded-full relative transition-colors", settings.anonymousDataSharing ? "bg-brand-500" : "bg-edge")}
+              <button
+                onClick={toggleCloudSync}
+                className={cn("w-8 h-4 rounded-full relative transition-colors", settings.cloudSyncEnabled ? "bg-brand-500" : "bg-edge")}
                 role="switch"
-                aria-checked={settings.anonymousDataSharing}
-                aria-label="Toggle anonymous data sharing"
+                aria-checked={settings.cloudSyncEnabled}
+                aria-label="Toggle cloud sync"
               >
-                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all", settings.anonymousDataSharing ? "right-0.5" : "left-0.5")} />
+                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all", settings.cloudSyncEnabled ? "right-0.5" : "left-0.5")} />
               </button>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-xs text-fg">Local Only Mode</p>
-                <p className="text-[10px] text-fg-faint">Disable all cloud features</p>
+                <p className="font-bold text-xs text-fg">Contribute to Research {EMOJI_CHART}</p>
+                <p className="text-[10px] text-fg-faint">Share anonymized posture stats</p>
               </div>
-              <button 
-                onClick={toggleLocalStorageOnly}
-                className={cn("w-8 h-4 rounded-full relative transition-colors", settings.localStorageOnly ? "bg-brand-500" : "bg-edge")}
+              <button
+                onClick={toggleContributeToResearch}
+                className={cn("w-8 h-4 rounded-full relative transition-colors", settings.contributeToResearch ? "bg-brand-500" : "bg-edge")}
                 role="switch"
-                aria-checked={settings.localStorageOnly}
-                aria-label="Toggle local only mode"
+                aria-checked={settings.contributeToResearch}
+                aria-label="Toggle contribute to research"
               >
-                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all", settings.localStorageOnly ? "right-0.5" : "left-0.5")} />
+                <div className={cn("absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all", settings.contributeToResearch ? "right-0.5" : "left-0.5")} />
               </button>
             </div>
           </div>
-          <div className="p-3 rounded-xl bg-tint-emerald border border-emerald-100 dark:border-emerald-500/20">
-            <p className="text-[10px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
-              🔒 All AI processing runs locally. No video ever leaves your device.
+          <div className="flex items-center justify-between p-3 rounded-xl bg-inset border border-edge-subtle">
+            <p className="text-[10px] text-fg-faint">
+              {settings.cloudSyncEnabled ? `${EMOJI_CLOUD} Synced` : `${EMOJI_PHONE} Local Only`}
+            </p>
+            <p className="text-[10px] text-fg-faint">
+              {EMOJI_LOCK} All AI processing runs locally
             </p>
           </div>
         </div>
@@ -328,7 +332,7 @@ export const Profile: React.FC<ProfileProps> = ({ user, logs, settings, setSetti
                   "w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0",
                   unlocked ? "bg-card shadow-sm" : "bg-inset"
                 )}>
-                  {unlocked ? def.icon : '🔒'}
+                  {unlocked ? def.icon : EMOJI_LOCK}
                 </div>
                 <div className="min-w-0">
                   <p className={cn("font-bold text-sm truncate", unlocked ? "text-fg" : "text-fg-faint")}>
@@ -337,7 +341,7 @@ export const Profile: React.FC<ProfileProps> = ({ user, logs, settings, setSetti
                   <p className="text-[10px] text-fg-faint leading-tight mt-0.5">{def.description}</p>
                   {unlocked?.unlockedAt && (
                     <p className="text-[9px] text-brand-400 mt-1 font-medium">
-                      ✓ {new Date(unlocked.unlockedAt).toLocaleDateString()}
+                      {CHAR_CHECK} {new Date(unlocked.unlockedAt).toLocaleDateString()}
                     </p>
                   )}
                 </div>

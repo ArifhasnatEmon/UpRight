@@ -14,7 +14,7 @@ interface AdvancedHealthMonitorProps {
   postureSensitivity: number;
   lowResourceMode?: boolean;
   showSkeleton?: boolean;
-  calibration?: any | null; // Calibration data
+  calibration?: any | null;
 }
 
 export const AdvancedHealthMonitor: React.FC<AdvancedHealthMonitorProps> = ({
@@ -163,7 +163,7 @@ export const AdvancedHealthMonitor: React.FC<AdvancedHealthMonitorProps> = ({
 
       const tryDevice = (deviceId?: string) => {
         if (!videoRef.current || !poseRef.current) return;
-        
+
         const constraints: MediaTrackConstraints = deviceId
           ? { deviceId: { exact: deviceId }, width: 640, height: 480 }
           : { width: 640, height: 480 };
@@ -279,7 +279,7 @@ export const AdvancedHealthMonitor: React.FC<AdvancedHealthMonitorProps> = ({
     <div className="relative rounded-2xl overflow-hidden bg-black aspect-video">
       <video ref={videoRef} className={cn("absolute inset-0 w-full h-full object-cover opacity-40 grayscale", !isActive && "hidden")} playsInline muted />
       <canvas ref={canvasRef} width={640} height={480} className={cn("absolute inset-0 w-full h-full pointer-events-none", !isActive && "hidden")} />
-      
+
       {isActive && !isCameraReady && !cameraError && (
         <div className="absolute inset-0 flex items-center justify-center text-white/50 text-sm font-mono">
           INITIALIZING AI ENGINE...
@@ -293,13 +293,13 @@ export const AdvancedHealthMonitor: React.FC<AdvancedHealthMonitorProps> = ({
           </div>
           <p className="text-white font-bold mb-2">Camera Error</p>
           <p className="text-neutral-400 text-xs max-w-[200px] mb-4">
-            {cameraError.includes("Requested device not found") 
+            {cameraError.includes("Requested device not found")
               ? "No camera detected. Please connect a webcam to use posture monitoring."
               : cameraError.includes("Permission denied") || cameraError.includes("NotAllowedError")
-              ? "Camera permission denied. Please allow camera access in your browser settings to use posture monitoring."
-              : cameraError}
+                ? "Camera permission denied. Please allow camera access in your browser settings to use posture monitoring."
+                : cameraError}
           </p>
-          <button 
+          <button
             onClick={() => setRetryCount(c => c + 1)}
             className="px-4 py-2 bg-white text-neutral-900 rounded-lg text-xs font-bold hover:bg-neutral-200 transition-colors"
           >

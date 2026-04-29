@@ -5,6 +5,7 @@ import { PostureLog, UserProfile, Session, BreakLog } from '../types';
 import { Zap, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { cn } from '../utils';
 import { getAnalyticsInsight } from '../lib/gemini';
+import { EMOJI_CHART, EMOJI_TARGET, CHAR_SPARKLE, EMOJI_CALENDAR, EMOJI_CLOCK } from '../lib/emoji';
 
 interface AnalyticsProps {
   logs: PostureLog[];
@@ -17,7 +18,7 @@ interface AnalyticsProps {
 export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [], breakLogs = [] }) => {
   const [filter, setFilter] = useState<'Daily' | 'Week' | 'Month'>('Daily');
   const [selectedDate, setSelectedDate] = useState(() => startOfDay(new Date()));
-  const [aiInsight, setAiInsight] = useState<string>('');
+  const [aiInsight, setAiInsight] = useState<string | null>('');
   const [isLoadingInsight, setIsLoadingInsight] = useState(false);
 
   // Deferred rendering — let the page shell paint first, then render heavy charts
@@ -215,7 +216,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
     setIsLoadingInsight(true);
     getAnalyticsInsight(avgScore, criticalPercent, tooClosePercent, worstHour)
       .then(result => {
-        setAiInsight(result);
+        setAiInsight(result ?? '');
       })
       .finally(() => setIsLoadingInsight(false));
   }, [filteredLogs, filter, chartsReady]);
@@ -354,7 +355,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
               </div>
             ) : aggregatedData.every(d => d.score === null) ? (
               <div className="h-full flex flex-col items-center justify-center gap-3 text-fg-faint">
-                <div className="w-16 h-16 rounded-2xl bg-inset flex items-center justify-center text-3xl">📊</div>
+                <div className="w-16 h-16 rounded-2xl bg-inset flex items-center justify-center text-3xl">{EMOJI_CHART}</div>
                 <p className="text-sm font-medium">No posture data for this period</p>
                 <p className="text-xs text-fg-faint">Start monitoring to see your trend</p>
               </div>
@@ -407,7 +408,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
               </div>
             ) : stateDistribution.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center gap-3 text-fg-faint">
-                <div className="w-16 h-16 rounded-2xl bg-inset flex items-center justify-center text-3xl">🎯</div>
+                <div className="w-16 h-16 rounded-2xl bg-inset flex items-center justify-center text-3xl">{EMOJI_TARGET}</div>
                 <p className="text-sm font-medium">No state data yet</p>
               </div>
             ) : (() => {
@@ -521,7 +522,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-display font-bold text-lg text-fg">Actionable Insight</h3>
             {aiInsight && (
-              <span className="text-[9px] font-bold text-brand-400 bg-tint-brand px-2 py-0.5 rounded-full uppercase tracking-wider">✦ AI</span>
+              <span className="text-[9px] font-bold text-brand-400 bg-tint-brand px-2 py-0.5 rounded-full uppercase tracking-wider">{CHAR_SPARKLE} AI</span>
             )}
           </div>
           {isLoadingInsight ? (
@@ -571,7 +572,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
             if (daysData.every(d => d.score === null)) {
               return (
                 <div className="h-full flex flex-col items-center justify-center gap-3 text-fg-faint">
-                  <div className="w-16 h-16 rounded-2xl bg-inset flex items-center justify-center text-3xl">📅</div>
+                  <div className="w-16 h-16 rounded-2xl bg-inset flex items-center justify-center text-3xl">{EMOJI_CALENDAR}</div>
                   <p className="text-sm font-medium">No posture data for the past 14 days</p>
                 </div>
               );
@@ -626,7 +627,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
         <h3 className="font-display font-bold text-lg text-fg">Recent Sessions</h3>
         {filteredSessions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-fg-faint">
-            <div className="w-12 h-12 rounded-xl bg-inset flex items-center justify-center text-2xl border border-edge-subtle shadow-sm">🕒</div>
+            <div className="w-12 h-12 rounded-xl bg-inset flex items-center justify-center text-2xl border border-edge-subtle shadow-sm">{EMOJI_CLOCK}</div>
             <p className="text-sm font-medium text-fg-muted mt-2">No recorded sessions yet</p>
             <p className="text-xs text-fg-faint">Sessions appear here after monitoring</p>
           </div>
@@ -782,7 +783,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ logs, user, sessions = [],
           className="px-5 py-2.5 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition-all flex items-center gap-2"
           aria-label="Download weekly report as HTML file"
         >
-          📊 Weekly Report (HTML)
+          {EMOJI_CHART} Weekly Report (HTML)
         </button>
 
         <button

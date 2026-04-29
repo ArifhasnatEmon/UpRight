@@ -42,8 +42,6 @@ export const DEFAULT_TIMING = {
 export const INTERNAL_TIMING = {
   /** Max one posture log per this interval (ms) */
   LOG_THROTTLE: 30 * 1000,
-  /** XP reward interval for good posture (ms) */
-  GOOD_POSTURE_XP_INTERVAL: 2 * 60 * 1000,
 } as const;
 
 // MediaPipe config
@@ -55,6 +53,6 @@ export const GEMINI_MODEL_ID = 'gemini-2.0-flash';
 
 // Level thresholds
 /** XP required to reach each level (index = level number) */
-export const XP_LEVEL_THRESHOLDS = [0, 0, 100, 250, 500, 1000] as const;
+export const XP_LEVEL_THRESHOLDS = [0, 0, 300, 750, 1500, 3000] as const;
 /** XP increment per level above level 5 */
-export const XP_PER_LEVEL_ABOVE_5 = 750;
+export const XP_PER_LEVEL_ABOVE_5 = 2000;

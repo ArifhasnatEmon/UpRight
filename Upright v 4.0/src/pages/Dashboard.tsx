@@ -23,6 +23,7 @@ interface DashboardProps {
   onStateChange: (state: PostureState, score: number) => void;
   calibration: CalibrationData | null;
   onCalibrationUpdate: (data: CalibrationData | null) => void;
+  reminderCompletions?: { water: number; eye: number; sitting: number };
 }
 
 // Dashboard component
@@ -42,7 +43,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   resetSittingTimer,
   onStateChange,
   calibration,
-  onCalibrationUpdate
+  onCalibrationUpdate,
+  reminderCompletions,
 }) => {
   return (
     <div className="space-y-4" role="region" aria-label="Dashboard">
@@ -215,6 +217,28 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                   <div className="text-right">
                     <p className="text-[8px] font-bold text-amber-500 dark:text-amber-400 uppercase">Paused</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Daily break progress */}
+              {reminderCompletions && (
+                <div className="p-3 rounded-xl bg-inset border border-edge-subtle space-y-2.5">
+                  <p className="text-[9px] font-bold text-fg-faint uppercase tracking-wider">Today's Breaks</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {([
+                      { icon: Droplets, count: reminderCompletions.water, label: 'Water', tint: 'bg-tint-blue', iconColor: 'text-blue-600 dark:text-blue-400', countColor: 'text-blue-700 dark:text-blue-300' },
+                      { icon: Eye, count: reminderCompletions.eye, label: 'Eyes', tint: 'bg-tint-indigo', iconColor: 'text-indigo-600 dark:text-indigo-400', countColor: 'text-indigo-700 dark:text-indigo-300' },
+                      { icon: Timer, count: reminderCompletions.sitting, label: 'Stretch', tint: 'bg-tint-amber', iconColor: 'text-amber-600 dark:text-amber-400', countColor: 'text-amber-700 dark:text-amber-300' },
+                    ]).map(item => (
+                      <div key={item.label} className="flex flex-col items-center gap-1 py-1.5">
+                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", item.tint)}>
+                          <item.icon className={cn("w-3.5 h-3.5", item.iconColor)} />
+                        </div>
+                        <span className={cn("text-sm font-bold leading-none", item.countColor)}>{item.count}</span>
+                        <span className="text-[8px] font-bold text-fg-faint uppercase tracking-wider">{item.label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

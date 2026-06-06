@@ -69,14 +69,6 @@ npm run electron:build
 
 The compiled installer will be available in the `release/` directory.
 
-## 🧪 Testing
-
-UpRight includes a comprehensive suite of unit tests for its core mathematical algorithms and posture detection modules. To run the tests:
-
-```bash
-npx vitest run
-```
-
 ## 🎓 Academic Context
 
 This application was developed as a university software engineering project with the goal of creating a scalable, low-cost, and privacy-respecting health tool for educational institutions and corporate workplaces in Bangladesh.

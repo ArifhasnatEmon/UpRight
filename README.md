@@ -1,16 +1,18 @@
 # UpRight — AI-Powered Digital Ergonomics System
 
-![UpRight Version](https://img.shields.io/badge/version-0.13.4-blue)
+![UpRight Version](https://img.shields.io/badge/version-0.14.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![Status](https://img.shields.io/badge/status-Stable-success)
 
-UpRight is a privacy-first, AI-powered desktop application designed to combat prolonged screen exposure and poor posture among students, IT professionals, and gamers. Built for low-bandwidth environments, UpRight combines local posture tracking, gamified engagement, and optional cloud analytics to create a comprehensive digital wellness solution.
+UpRight is a privacy-first, AI-powered desktop application designed to combat prolonged screen exposure and poor posture among students, IT professionals, and gamers. Built for low-bandwidth and offline environments, UpRight combines local posture tracking, gamified engagement, and optional cloud analytics to create a comprehensive digital wellness solution.
 
 ## 🚀 Key Features
 
-* **Offline Posture Detection:** Real-time AI analysis of neck, shoulder, and head alignment processed entirely locally.
+* **100% Offline AI Detection:** Uses locally hosted MediaPipe WebAssembly binaries and models. No internet connection is required for skeleton tracking, ensuring zero external bandwidth dependency.
+* **Advanced 6-Metric Engine:** Tracks forward slouching, backward leaning, 3D spatial coordinate shifts, and includes a zone-based vertical neck pitch system (Safe, Micro-Forward, Slouching, Micro-Backward, Hyperextension) to prevent false alerts.
+* **Frame-Height Fallback:** Instantly catches extreme reclining and slouching postures by monitoring nose-in-frame coordinates, working immediately without requiring calibration.
 * **Eye Strain & Screen Distance Monitoring:** Actively tracks user distance from the screen to prevent visual fatigue.
-* **Privacy-First Architecture:** Camera input is processed locally via MediaPipe. No video data is ever stored or transmitted.
+* **Privacy-First Architecture:** Camera input is processed locally. No video data is ever stored or transmitted to any server.
 * **Gamification System:** Integrated XP, level progression, and achievement unlocks to encourage long-term posture habits.
 * **Gemini AI Health Tips:** Generates personalised, daily ergonomic advice based on your numeric session data.
 * **Low Resource Mode:** Optimises CPU usage by disabling skeleton rendering and reducing frame rates for older hardware.
@@ -21,10 +23,9 @@ UpRight is a privacy-first, AI-powered desktop application designed to combat pr
 * **Frontend:** React 19, TypeScript, Vite
 * **Desktop Environment:** Electron, Electron Builder
 * **Styling & Animations:** TailwindCSS 4, Framer Motion
-* **AI & Machine Learning:** Google MediaPipe Pose, Google Gemini 1.5 Flash API
+* **AI & Machine Learning:** Google MediaPipe Pose (Local WASM/Assets), Google Gemini 1.5 Flash API
 * **Backend & Auth:** Supabase (JWT)
 * **Local Storage:** localStorage, Electron Store
-* **Testing:** Vitest
 
 ## 📦 Installation & Setup
 
@@ -69,17 +70,8 @@ npm run electron:build
 
 The compiled installer will be available in the `release/` directory.
 
-## 🧪 Testing
-
-UpRight includes a comprehensive suite of unit tests for its core mathematical algorithms and posture detection modules. To run the tests:
-
-```bash
-npx vitest run
-```
-
 ## 🎓 Academic Context
 
 This application was developed as a university software engineering project with the goal of creating a scalable, low-cost, and privacy-respecting health tool for educational institutions and corporate workplaces in Bangladesh.
 
----
-*Built with ❤️ for digital wellness.*
+

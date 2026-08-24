@@ -70,7 +70,7 @@ function createSupabaseClient() {
 
   return createClient<Database>(url, key, {
     auth: {
-      // Upright uses its own email-based identity, not Supabase Auth.
+      // ErgoNudge uses its own email-based identity, not Supabase Auth.
       // Disable auto-session management to avoid unexpected token refreshes.
       persistSession: false,
       autoRefreshToken: false,

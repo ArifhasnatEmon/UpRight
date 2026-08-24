@@ -119,7 +119,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           animation-delay: 0.8s;
         }
 
-        /* UpRight Brand Text */
+        /* ErgoNudge Brand Text */
         .brand-title {
           font-family: 'Space Grotesk', sans-serif;
           font-size: 44px;
@@ -140,20 +140,22 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           animation: slideUpReveal 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        /* "Up" - Silver/white styling */
+        /* "Ergo" - Silver/white styling */
         .brand-title span:nth-child(1),
-        .brand-title span:nth-child(2) {
+        .brand-title span:nth-child(2),
+        .brand-title span:nth-child(3),
+        .brand-title span:nth-child(4) {
           background: linear-gradient(180deg, #ffffff 40%, #c1c5cd 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
 
-        /* "Right" - Green ergonomic styling */
-        .brand-title span:nth-child(3),
-        .brand-title span:nth-child(4),
+        /* "Nudge" - Green ergonomic styling */
         .brand-title span:nth-child(5),
         .brand-title span:nth-child(6),
-        .brand-title span:nth-child(7) {
+        .brand-title span:nth-child(7),
+        .brand-title span:nth-child(8),
+        .brand-title span:nth-child(9) {
           background: linear-gradient(180deg, #4ade80 30%, #15803d 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -161,13 +163,15 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         }
 
         /* Stagger delays */
-        .brand-title span:nth-child(1) { animation-delay: 0.1s; }
+        .brand-title span:nth-child(1) { animation-delay: 0.10s; }
         .brand-title span:nth-child(2) { animation-delay: 0.18s; }
         .brand-title span:nth-child(3) { animation-delay: 0.26s; }
         .brand-title span:nth-child(4) { animation-delay: 0.34s; }
         .brand-title span:nth-child(5) { animation-delay: 0.42s; }
         .brand-title span:nth-child(6) { animation-delay: 0.50s; }
         .brand-title span:nth-child(7) { animation-delay: 0.58s; }
+        .brand-title span:nth-child(8) { animation-delay: 0.66s; }
+        .brand-title span:nth-child(9) { animation-delay: 0.74s; }
 
         /* Subtitle and Loading Container */
         .subtitle-container {
@@ -295,13 +299,15 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
           {/* Staggered slide-up reveal for Brand Name */}
           <h1 className="brand-title">
-            <span>U</span>
-            <span>p</span>
-            <span>R</span>
-            <span>i</span>
+            <span>E</span>
+            <span>r</span>
             <span>g</span>
-            <span>h</span>
-            <span>t</span>
+            <span>o</span>
+            <span>N</span>
+            <span>u</span>
+            <span>d</span>
+            <span>g</span>
+            <span>e</span>
           </h1>
 
           {/* Subtitle and Loading Progress Bar */}

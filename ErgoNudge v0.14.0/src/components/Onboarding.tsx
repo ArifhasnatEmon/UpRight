@@ -46,7 +46,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currentUserE
 
   const allSteps = [
     {
-      title: 'Welcome to UpRight',
+      title: 'Welcome to ErgoNudge',
       description: "Your AI-powered ergonomic companion. Let's get you set up for a healthier workday.",
       icon: <Zap className="w-12 h-12 text-brand-500" />,
       content: (
@@ -80,7 +80,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currentUserE
     },
     {
       title: 'Face Recognition',
-      description: 'Let UpRight learn your face to automatically switch profiles when someone else sits down.',
+      description: 'Let ErgoNudge learn your face to automatically switch profiles when someone else sits down.',
       icon: <ScanFace className="w-12 h-12 text-brand-500" />,
       content: (
         <div className="space-y-4 py-4">
@@ -119,7 +119,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currentUserE
                   Face enrolled for {userName ?? 'you'} ✓
                 </p>
                 <p className="text-xs text-fg-faint text-center mb-2">
-                  UpRight will now recognise you automatically and switch profiles when a different person sits down.
+                  ErgoNudge will now recognise you automatically and switch profiles when a different person sits down.
                 </p>
                 <button
                   onClick={() => setStep(s => s + 1)}
@@ -154,7 +154,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete, currentUserE
     },
     {
       title: 'Ready to Go!',
-      description: "You're all set. UpRight will now monitor your posture in the background and alert you when needed.",
+      description: "You're all set. ErgoNudge will now monitor your posture in the background and alert you when needed.",
       icon: <Check className="w-12 h-12 text-emerald-500" />,
       content: (
         <div className="space-y-4 py-8">

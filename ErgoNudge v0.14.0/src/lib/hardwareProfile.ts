@@ -3,11 +3,12 @@ import { HardwareProfile } from '../types';
 // Hardware profile
 
 // Cache key
-const PROFILE_KEY = 'upright_hardware_profile';
+const PROFILE_KEY = 'ergonudge_hardware_profile';
+const LEGACY_PROFILE_KEY = 'upright_hardware_profile';
 
 export const getHardwareProfile = async (forceRefresh = false): Promise<HardwareProfile> => {
   if (!forceRefresh) {
-    const cached = localStorage.getItem(PROFILE_KEY);
+    const cached = localStorage.getItem(PROFILE_KEY) || localStorage.getItem(LEGACY_PROFILE_KEY);
     if (cached) {
       try {
         const profile: HardwareProfile = JSON.parse(cached);

@@ -154,11 +154,11 @@ export function getPersonalThresholds(calibration: CalibrationData) {
 }
 
 export function saveCalibration(data: CalibrationData) {
-  localStorage.setItem('upright_calibration', JSON.stringify(data));
+  localStorage.setItem('ergonudge_calibration', JSON.stringify(data));
 }
 
 export function loadCalibration(): CalibrationData | null {
-  const stored = localStorage.getItem('upright_calibration');
+  const stored = localStorage.getItem('ergonudge_calibration') || localStorage.getItem('upright_calibration');
   if (!stored) return null;
   try {
     const data = JSON.parse(stored) as CalibrationData;
@@ -183,5 +183,6 @@ export function loadCalibration(): CalibrationData | null {
 }
 
 export function clearCalibration() {
+  localStorage.removeItem('ergonudge_calibration');
   localStorage.removeItem('upright_calibration');
 }

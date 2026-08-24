@@ -13,7 +13,7 @@ async function getFaceProfileStore() {
   }
   faceProfileStore = new Store({
     name: 'face-profiles',
-    // Stored at: AppData\Roaming\Upright\face-profiles.json
+    // Stored at: AppData\Roaming\ErgoNudge\face-profiles.json
     // CRITICAL: Disable dot-notation so email keys like "user@gmail.com"
     // are stored as literal keys, not split into nested objects.
     accessPropertiesByDotNotation: false,
@@ -190,7 +190,7 @@ function createOverlayWindow() {
 
 function updateTrayMenu(isPaused) {
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Open UpRight', click: () => {
+    { label: 'Open ErgoNudge', click: () => {
       if (mainWindow.restoreFromTray) mainWindow.restoreFromTray();
       else mainWindow.show();
     }},
@@ -234,7 +234,7 @@ function createTray() {
   tray = new Tray(icon.isEmpty() ? icon : icon.resize({ width: 16, height: 16 }));
 
   updateTrayMenu(false);
-  tray.setToolTip('UpRight Posture Monitor');
+  tray.setToolTip('ErgoNudge Posture Monitor');
 
   tray.on('double-click', () => {
     if (mainWindow.restoreFromTray) mainWindow.restoreFromTray();

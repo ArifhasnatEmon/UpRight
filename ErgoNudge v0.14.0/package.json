@@ -1,5 +1,5 @@
 {
-  "name": "upright",
+  "name": "ergonudge",
   "private": true,
   "version": "0.14.0",
   "type": "module",
@@ -14,8 +14,8 @@
   },
   "main": "electron-main.cjs",
   "build": {
-    "appId": "com.upright.app",
-    "productName": "Upright",
+    "appId": "com.ergonudge.app",
+    "productName": "ErgoNudge",
     "directories": {
       "output": "release"
     },
@@ -39,7 +39,9 @@
     "date-fns": "^4.1.0",
     "electron-store": "^11.0.2",
     "face-api.js": "^0.22.2",
+    "html-docx-js": "^0.3.1",
     "lucide-react": "^0.546.0",
+    "marked": "^18.0.7",
     "motion": "^12.23.24",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

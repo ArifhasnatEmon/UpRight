@@ -109,7 +109,7 @@ export const CalibrationWizard: React.FC<CalibrationWizardProps> = ({ onClose, o
       poseRef.current = pose;
 
       try {
-        const cachedDeviceId = localStorage.getItem('upright_camera_device_id');
+        const cachedDeviceId = localStorage.getItem('ergonudge_camera_device_id') || localStorage.getItem('upright_camera_device_id');
 
         const camera = new Camera(videoRef.current, {
           onFrame: async () => {

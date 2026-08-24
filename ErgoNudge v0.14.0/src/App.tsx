@@ -106,9 +106,7 @@ export default function App() {
 
   // Cloud sync (push-only, non-blocking)
   const avatarDataUrl = appData.currentUserEmail
-    ? localStorage.getItem(storageKeys.avatar
-        ? storageKeys.avatar(appData.currentUserEmail)
-        : `upright_avatar_${appData.currentUserEmail}`)
+    ? (localStorage.getItem(storageKeys.avatar(appData.currentUserEmail)) || localStorage.getItem(`upright_avatar_${appData.currentUserEmail}`))
     : null;
   const { isSyncing, lastSyncAt, syncError, syncNow } = useCloudSync({
     email: appData.currentUserEmail,
@@ -280,9 +278,9 @@ export default function App() {
   const createSessionWithLoginBonus = useCallback((email: string) => {
     appData.createSession(email);
     const todayKey = new Date().toISOString().split('T')[0];
-    const lastLoginDay = localStorage.getItem('upright_last_login_day');
+    const lastLoginDay = localStorage.getItem('ergonudge_last_login_day') || localStorage.getItem('upright_last_login_day');
     if (lastLoginDay !== todayKey) {
-      localStorage.setItem('upright_last_login_day', todayKey);
+      localStorage.setItem('ergonudge_last_login_day', todayKey);
       appData.addXP(20);
       setToastMessage(`${EMOJI_GLOW_STAR} Daily login bonus: +20 XP!`);
     }
@@ -609,7 +607,7 @@ export default function App() {
           <div className="w-8 h-8 bg-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
             <Activity className="w-5 h-5 text-white" />
           </div>
-          <h1 className="font-display font-bold text-xl tracking-tight text-fg">UpRight</h1>
+          <h1 className="font-display font-bold text-xl tracking-tight text-fg">ErgoNudge</h1>
         </div>
 
         <div className="flex items-center gap-6">

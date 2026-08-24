@@ -4,6 +4,7 @@ import { ACHIEVEMENT_DEFINITIONS } from '../lib/constants';
 import { UserProfile, PostureLog, AppSettings } from '../types';
 import { cn } from '../utils';
 import { EMOJI_CLOUD, EMOJI_CHART, EMOJI_PHONE, EMOJI_LOCK, CHAR_CHECK } from '../lib/emoji';
+import { storageKeys } from '../lib/storage';
 
 interface ProfileProps {
   user: UserProfile;
@@ -25,8 +26,8 @@ export const Profile: React.FC<ProfileProps> = ({ user, logs, settings, setSetti
   const [editNameValue, setEditNameValue] = useState(user.name);
 
   // Avatar state
-  const avatarKey = currentUserEmail ? `upright_avatar_${currentUserEmail}` : 'upright_avatar_guest';
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => localStorage.getItem(avatarKey));
+  const avatarKey = storageKeys.avatar(currentUserEmail);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(() => localStorage.getItem(avatarKey) || (currentUserEmail ? localStorage.getItem(`upright_avatar_${currentUserEmail}`) : localStorage.getItem('upright_avatar_guest')));
 
   // Modal state
   const [showCropModal, setShowCropModal] = useState(false);
@@ -428,7 +429,7 @@ export const Profile: React.FC<ProfileProps> = ({ user, logs, settings, setSetti
             <ScanFace className="w-4 h-4 text-brand-600 dark:text-brand-400" /> Face Recognition
           </h3>
           <p className="text-xs text-fg-muted leading-relaxed max-w-2xl">
-            Let UpRight automatically switch to your profile when you sit at the computer. 
+            Let ErgoNudge automatically switch to your profile when you sit at the computer. 
             All processing happens 100% locally on your device — your face data is never uploaded.
           </p>
           

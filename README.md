@@ -1,10 +1,10 @@
-# UpRight — AI-Powered Digital Ergonomics System
+# ErgoNudge — AI-Powered Digital Ergonomics System
 
-![UpRight Version](https://img.shields.io/badge/version-0.14.0-blue)
+![ErgoNudge Version](https://img.shields.io/badge/version-0.14.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![Status](https://img.shields.io/badge/status-Stable-success)
 
-UpRight is a privacy-first, AI-powered desktop application designed to combat prolonged screen exposure and poor posture among students, IT professionals, and gamers. Built for low-bandwidth and offline environments, UpRight combines local posture tracking, gamified engagement, and optional cloud analytics to create a comprehensive digital wellness solution.
+ErgoNudge is a privacy-first, AI-powered desktop application designed to combat prolonged screen exposure and poor posture among students, IT professionals, and gamers. Built for low-bandwidth and offline environments, ErgoNudge combines local posture tracking, gamified engagement, and optional cloud analytics to create a comprehensive digital wellness solution.
 
 ## 🚀 Key Features
 
@@ -29,12 +29,12 @@ UpRight is a privacy-first, AI-powered desktop application designed to combat pr
 
 ## 📦 Installation & Setup
 
-To run the UpRight application locally for development:
+To run the ErgoNudge application locally for development:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/upright.git
-   cd upright
+   git clone https://github.com/your-username/ergonudge.git
+   cd ergonudge
    ```
 
 2. **Install dependencies:**

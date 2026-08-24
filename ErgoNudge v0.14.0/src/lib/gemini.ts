@@ -19,7 +19,7 @@ const getCached = (key: string): string | null => {
   const memEntry = CACHE[key];
   if (memEntry && Date.now() < memEntry.expiresAt) return memEntry.value;
   try {
-    const stored = localStorage.getItem(`upright_ai_cache_${key}`);
+    const stored = localStorage.getItem(`ergonudge_ai_cache_${key}`) || localStorage.getItem(`upright_ai_cache_${key}`);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Date.now() < parsed.expiresAt) {
@@ -35,7 +35,7 @@ const setCache = (key: string, value: string, ttlMs: number) => {
   const entry = { value, expiresAt: Date.now() + ttlMs };
   CACHE[key] = entry;
   try {
-    localStorage.setItem(`upright_ai_cache_${key}`, JSON.stringify(entry));
+    localStorage.setItem(`ergonudge_ai_cache_${key}`, JSON.stringify(entry));
   } catch {}
 };
 
@@ -57,14 +57,14 @@ async function callProxy(
     });
 
     if (error) {
-      console.warn('[UpRight] Edge Function error:', error.message);
+      console.warn('[ErgoNudge] Edge Function error:', error.message);
       return null;
     }
 
     const result = (data as { result?: string })?.result?.trim();
     return result || null;
   } catch (err) {
-    console.warn('[UpRight] Gemini proxy unreachable:', err);
+    console.warn('[ErgoNudge] Gemini proxy unreachable:', err);
     return null;
   }
 }

@@ -8,7 +8,7 @@ import { UserProfile, PostureLog, Session, BreakLog } from '../types';
 
 const SYNC_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 const BATCH_SIZE = 500;
-const LAST_SYNC_KEY = 'upright_last_sync';
+const LAST_SYNC_KEY = 'ergonudge_last_sync';
 
 interface UseCloudSyncOptions {
   email: string | null;

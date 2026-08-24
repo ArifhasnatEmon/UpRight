@@ -226,7 +226,7 @@ export const AdvancedHealthMonitor: React.FC<AdvancedHealthMonitorProps> = ({
       if (!videoRef.current || !poseRef.current) return;
 
       // Cached device
-      const cachedDeviceId = localStorage.getItem('upright_camera_device_id');
+      const cachedDeviceId = localStorage.getItem('ergonudge_camera_device_id') || localStorage.getItem('upright_camera_device_id');
 
       const tryDevice = (deviceId?: string) => {
         if (!videoRef.current || !poseRef.current) return;
@@ -299,7 +299,7 @@ export const AdvancedHealthMonitor: React.FC<AdvancedHealthMonitorProps> = ({
               const devices = await navigator.mediaDevices.enumerateDevices();
               const videoDevices = devices.filter(d => d.kind === 'videoinput');
               if (videoDevices.length > 0 && videoDevices[0].deviceId) {
-                localStorage.setItem('upright_camera_device_id', videoDevices[0].deviceId);
+                localStorage.setItem('ergonudge_camera_device_id', videoDevices[0].deviceId);
               }
             } catch { /* ignore enumeration errors */ }
           }
@@ -320,7 +320,7 @@ export const AdvancedHealthMonitor: React.FC<AdvancedHealthMonitorProps> = ({
                 if (isMounted) {
                   setIsCameraReady(true);
                   setCameraError(null);
-                  localStorage.setItem('upright_camera_device_id', device.deviceId);
+                  localStorage.setItem('ergonudge_camera_device_id', device.deviceId);
                 }
                 return;
               }

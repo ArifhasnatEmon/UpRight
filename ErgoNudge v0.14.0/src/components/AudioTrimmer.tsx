@@ -152,7 +152,7 @@ export const AudioTrimmer: React.FC<AudioTrimmerProps> = ({
 
         ctx.close();
       } catch (err) {
-        console.error('[UpRight] Failed to decode audio:', err);
+        console.error('[ErgoNudge] Failed to decode audio:', err);
       }
     };
 
@@ -361,7 +361,7 @@ export const AudioTrimmer: React.FC<AudioTrimmerProps> = ({
 
       onClipReady(dataUrl, clipDuration);
     } catch (err) {
-      console.error('[UpRight] Failed to extract clip:', err);
+      console.error('[ErgoNudge] Failed to extract clip:', err);
     } finally {
       setIsExtracting(false);
     }

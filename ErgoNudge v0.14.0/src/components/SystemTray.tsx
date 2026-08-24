@@ -5,7 +5,8 @@ import { cn } from '../utils';
 
 import { PostureState } from '../types';
 
-const TRAY_POSITION_KEY = 'upright_tray_position';
+const TRAY_POSITION_KEY = 'ergonudge_tray_position';
+const LEGACY_TRAY_POSITION_KEY = 'upright_tray_position';
 
 interface SystemTrayProps {
   isOpen: boolean;
@@ -97,7 +98,7 @@ const STATE_CONFIG = {
 export const SystemTray: React.FC<SystemTrayProps> = ({ isOpen, onToggle, onClose, onAction, postureState, isMonitoring, snoozeRemainingMinutes, onMouseEnter, onMouseLeave, className }) => {
   const [position, setPosition] = useState<{ x: number; y: number }>(() => {
     try {
-      const saved = localStorage.getItem(TRAY_POSITION_KEY);
+      const saved = localStorage.getItem(TRAY_POSITION_KEY) || localStorage.getItem(LEGACY_TRAY_POSITION_KEY);
       if (saved) return JSON.parse(saved);
     } catch { /* ignore */ }
     return { x: window.innerWidth - 64, y: window.innerHeight - 64 };
@@ -176,7 +177,7 @@ export const SystemTray: React.FC<SystemTrayProps> = ({ isOpen, onToggle, onClos
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: config.brandIconBg }}>
                     <Activity className="w-4 h-4" style={{ color: config.iconColor }} />
                   </div>
-                  <span className="text-[13px] font-bold text-white" style={{ letterSpacing: '-0.02em' }}>UpRight</span>
+                  <span className="text-[13px] font-bold text-white" style={{ letterSpacing: '-0.02em' }}>ErgoNudge</span>
                 </div>
                 <div className="flex items-center gap-[5px] px-2.5 py-[3px] rounded-full" style={{ background: config.pillBg }}>
                   <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: config.dotBg }} />
@@ -227,7 +228,7 @@ export const SystemTray: React.FC<SystemTrayProps> = ({ isOpen, onToggle, onClos
                 style={{ color: 'rgba(248, 113, 113, 0.7)', fontSize: '13px', fontWeight: 600 }}
               >
                 <LogOut className="w-[17px] h-[17px] opacity-50" />
-                Exit UpRight
+                Exit ErgoNudge
               </button>
             </div>
           </motion.div>

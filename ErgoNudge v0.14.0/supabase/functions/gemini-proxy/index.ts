@@ -1,5 +1,5 @@
 // supabase/functions/gemini-proxy/index.ts
-// Deno Edge Function — secure Gemini API proxy for Upright
+// Deno Edge Function — secure Gemini API proxy for ErgoNudge
 // The GEMINI_API_KEY lives as a Supabase secret, never in the client bundle.
 // @ts-nocheck — Deno URL imports are not understood by VS Code's Node TS engine
 
